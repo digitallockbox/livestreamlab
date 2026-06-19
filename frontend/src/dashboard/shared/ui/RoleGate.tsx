@@ -14,23 +14,32 @@ export default function RoleGate({ requiredRoles, children }: Props) {
   const [loading, setLoading] = useState(true);
   const allowedRoles = useMemo(() => new Set(requiredRoles), [requiredRoles]);
 
+  function replaceIfNeeded(target: string) {
+    const currentPath = router.asPath.split("?")[0];
+    if (currentPath !== target) {
+      router.replace(target);
+    }
+  }
+
   useEffect(() => {
+    if (!router.isReady) return;
+
     const current = getSession();
     setSession(current);
 
     if (!current) {
-      router.replace("/login");
+      replaceIfNeeded("/login");
       return;
     }
 
     if (!allowedRoles.has(current.role)) {
       const fallback = current.role === "admin" ? "/dashboard/home" : "/creator-dashboard";
-      router.replace(fallback);
+      replaceIfNeeded(fallback);
       return;
     }
 
     if (!current.onboardingComplete) {
-      router.replace("/account/onboarding");
+      replaceIfNeeded("/account/onboarding");
       return;
     }
 

@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import {
-  backendOrigin,
-  clearSession,
-  getSession,
-  saveSession,
-} from "../../src/dashboard/shared/utils/session";
+import { clearSession, getSession, saveSession } from "../../src/dashboard/shared/utils/session";
 
 export default function AccountOnboardingPage() {
   const router = useRouter();
@@ -63,7 +58,7 @@ export default function AccountOnboardingPage() {
     const timeout = setTimeout(async () => {
       try {
         setSaveState("Auto-saving...");
-        const res = await fetch(`${backendOrigin()}/user/profile/me`, {
+        const res = await fetch("/api/user/profile/me", {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -84,7 +79,7 @@ export default function AccountOnboardingPage() {
         }
 
         const updated = await res.json();
-        const refreshedSession = await fetch(`${backendOrigin()}/auth/session`, {
+        const refreshedSession = await fetch("/api/auth/session", {
           headers: { Authorization: `Bearer ${session.token}` },
         }).then((result) => result.json());
 
@@ -114,7 +109,7 @@ export default function AccountOnboardingPage() {
     setMessage("Saving account setup...");
     setSaveState("Saving...");
 
-    const res = await fetch(`${backendOrigin()}/user/profile/me`, {
+    const res = await fetch("/api/user/profile/me", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -136,7 +131,7 @@ export default function AccountOnboardingPage() {
     }
 
     const updated = await res.json();
-    const refreshedSession = await fetch(`${backendOrigin()}/auth/session`, {
+    const refreshedSession = await fetch("/api/auth/session", {
       headers: { Authorization: `Bearer ${session.token}` },
     }).then((result) => result.json());
 

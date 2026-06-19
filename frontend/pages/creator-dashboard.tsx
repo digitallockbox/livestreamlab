@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import RoleGate from "../src/dashboard/shared/ui/RoleGate";
-import { backendOrigin, getSession } from "../src/dashboard/shared/utils/session";
+import { getSession } from "../src/dashboard/shared/utils/session";
 
 type NameSummary = {
   hasName?: boolean;
@@ -19,7 +19,7 @@ export default function CreatorDashboardPage() {
   useEffect(() => {
     if (!session?.token) return;
 
-    fetch(`${backendOrigin()}/web3/name/my`, {
+    fetch("/api/web3/name/my", {
       headers: { Authorization: `Bearer ${session.token}` },
     })
       .then((res) => res.json())

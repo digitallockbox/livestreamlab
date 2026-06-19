@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
-import { backendOrigin } from "../src/dashboard/shared/utils/session";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
+import { getSession } from "../src/dashboard/shared/utils/session";
 
 const providers = [
   { id: "google", label: "Google" },
@@ -9,6 +10,7 @@ const providers = [
 ] as const;
 
 export default function LoginPage() {
+  const router = useRouter();
   const [providerId, setProviderId] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState("");
@@ -17,6 +19,18 @@ export default function LoginPage() {
     if (typeof window === "undefined") return "";
     return `${window.location.origin}/auth/callback`;
   }, []);
+
+  useEffect(() => {
+    const session = getSession();
+    if (!session) return;
+
+    if (!session.onboardingComplete) {
+      router.replace("/account/onboarding");
+      return;
+    }
+
+    router.replace(session.role === "admin" ? "/dashboard/home" : "/creator-dashboard");
+  }, [router]);
 
   function signIn(provider: (typeof providers)[number]["id"]) {
     if (!providerId.trim()) {
@@ -27,7 +41,7 @@ export default function LoginPage() {
     if (!callbackUrl) return;
     setError("");
     const start =
-      `${backendOrigin()}/auth/${provider}/start` +
+      `/api/auth/${provider}/start` +
       `?providerId=${encodeURIComponent(providerId.trim())}` +
       `&name=${encodeURIComponent(displayName.trim())}` +
       `&redirect=${encodeURIComponent(callbackUrl)}`;
@@ -38,7 +52,7 @@ export default function LoginPage() {
     const walletAddress = window.prompt("Enter Phantom wallet address");
     if (!walletAddress) return;
 
-    const res = await fetch(`${backendOrigin()}/auth/phantom`, {
+    const res = await fetch("/api/auth/phantom", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ walletAddress, name: "Phantom User" }),

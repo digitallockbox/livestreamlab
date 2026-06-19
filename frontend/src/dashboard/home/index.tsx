@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { backendOrigin, getSession } from "../shared/utils/session";
+import { getSession } from "../shared/utils/session";
 
 type NameSummary = {
   hasName?: boolean;
@@ -16,7 +16,7 @@ export default function Home() {
   useEffect(() => {
     if (!session?.token) return;
 
-    fetch(`${backendOrigin()}/web3/name/my`, {
+    fetch("/api/web3/name/my", {
       headers: { Authorization: `Bearer ${session.token}` },
     })
       .then((res) => res.json())

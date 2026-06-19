@@ -101,6 +101,16 @@ function parseUser(headers) {
   return verifyToken(token);
 }
 
+function isFrontendPath(pathName) {
+  if (pathName === "/" || pathName === "/login" || pathName === "/creator-dashboard") {
+    return true;
+  }
+
+  return ["/dashboard/", "/account/", "/auth/", "/creator/", "/u/"].some((prefix) =>
+    pathName.startsWith(prefix)
+  );
+}
+
 const server = http.createServer(async (req, res) => {
   applyCors(res);
   if (req.method === "OPTIONS") {
@@ -122,7 +132,7 @@ const server = http.createServer(async (req, res) => {
     const isGet = req.method === "GET";
     const isApiLike = pathName.startsWith("/api/") || pathName.startsWith("/auth/") || pathName.startsWith("/web3/");
 
-    if (isGet && acceptsHtml && !isApiLike) {
+    if (isGet && acceptsHtml && !isApiLike && isFrontendPath(pathName)) {
       const target = `${FRONTEND_ORIGIN.replace(/\/$/, "")}${requestUrl.pathname}${requestUrl.search}`;
       res.writeHead(302, { Location: target });
       res.end();

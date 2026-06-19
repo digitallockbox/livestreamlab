@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { backendOrigin, saveSession } from "../../src/dashboard/shared/utils/session";
+import { saveSession } from "../../src/dashboard/shared/utils/session";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -14,7 +14,7 @@ export default function AuthCallbackPage() {
         return;
       }
 
-      const res = await fetch(`${backendOrigin()}/auth/session`, {
+      const res = await fetch("/api/auth/session", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
