@@ -1,5 +1,6 @@
 const http = require("http");
 const { URL } = require("url");
+const { verifyToken } = require("./services/authService");
 
 const feedRoutes = require("./routes/feed");
 const systemRoutes = require("./routes/system");
@@ -76,10 +77,35 @@ function createResponse(res) {
       res.writeHead(this.statusCode, { "Content-Type": "application/json" });
       res.end(JSON.stringify(payload));
     },
+    redirect(location, statusCode = 302) {
+      res.writeHead(statusCode, { Location: location });
+      res.end();
+    },
   };
 }
 
+function applyCors(res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS");
+}
+
+function parseUser(headers) {
+  const auth = headers.authorization || headers.Authorization;
+  if (!auth || typeof auth !== "string") return null;
+  if (!auth.startsWith("Bearer ")) return null;
+  const token = auth.slice("Bearer ".length).trim();
+  return verifyToken(token);
+}
+
 const server = http.createServer(async (req, res) => {
+  applyCors(res);
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
   const requestUrl = new URL(req.url, `http://${req.headers.host || `localhost:${PORT}`}`);
   const pathName = requestUrl.pathname;
 
@@ -106,9 +132,19 @@ const server = http.createServer(async (req, res) => {
       params,
       query: Object.fromEntries(requestUrl.searchParams.entries()),
       body: parseBody(rawBody),
+      headers: req.headers,
+      user: parseUser(req.headers),
     };
 
     const resContext = createResponse(res);
+
+    if (route.roles && !reqContext.user) {
+      return resContext.status(401).json({ error: "Unauthorized" });
+    }
+
+    if (route.roles && reqContext.user && !route.roles.includes(reqContext.user.role)) {
+      return resContext.status(403).json({ error: "Forbidden" });
+    }
 
     try {
       await route.handler(reqContext, resContext, (error) => {

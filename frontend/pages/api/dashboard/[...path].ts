@@ -50,12 +50,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const targetUrl = `${baseUrl.replace(/\/$/, "")}/${routePath}${queryString ? `?${queryString}` : ""}`;
 
   try {
+    const incomingAuth = req.headers.authorization;
     const upstream = await fetch(targetUrl, {
       method: req.method,
       headers: {
         ...(req.method === "POST" ? { "Content-Type": "application/json" } : {}),
         Accept: "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(incomingAuth
+          ? { Authorization: incomingAuth }
+          : token
+            ? { Authorization: `Bearer ${token}` }
+            : {}),
       },
       body: req.method === "POST" ? JSON.stringify(req.body || {}) : undefined,
     });

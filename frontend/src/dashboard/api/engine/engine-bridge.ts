@@ -1,3 +1,5 @@
+import { getSessionToken } from "../../shared/utils/session";
+
 const BASE_URL = "/api/dashboard";
 
 export type DashboardApiResult<T = unknown> = {
@@ -8,9 +10,11 @@ export type DashboardApiResult<T = unknown> = {
 };
 
 function defaultHeaders() {
+  const token = getSessionToken();
   return {
     "Content-Type": "application/json",
     Accept: "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
 
