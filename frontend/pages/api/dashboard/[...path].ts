@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const DEFAULT_UPSTREAM_BASE = "https://api.livestreamlab.live";
+const LOCAL_UPSTREAM_BASE = "http://localhost:4000";
 
 const ALLOWED_ENDPOINTS = new Set([
     "system/health",
@@ -14,7 +15,8 @@ const ALLOWED_ENDPOINTS = new Set([
 ]);
 
 function getUpstreamConfig() {
-    const baseUrl = process.env.DASHBOARD_API_BASE_URL || DEFAULT_UPSTREAM_BASE;
+    const baseUrl = process.env.DASHBOARD_API_BASE_URL
+        || (process.env.NODE_ENV === "development" ? LOCAL_UPSTREAM_BASE : DEFAULT_UPSTREAM_BASE);
     const token = process.env.DASHBOARD_API_TOKEN || "";
 
     return { baseUrl, token };
