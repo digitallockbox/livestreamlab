@@ -7,6 +7,7 @@ export default function IndexPage() {
     if (typeof window === "undefined") return null;
     const session = getSession();
     if (!session) return null;
+    if (!session.onboardingComplete) return "/account/onboarding";
     return session.role === "admin" ? "/dashboard/home" : "/creator-dashboard";
   }, []);
 
@@ -17,6 +18,9 @@ export default function IndexPage() {
       <div className="card">
         <p>
           <Link href="/login">Login</Link>
+        </p>
+        <p>
+          <Link href="/account/onboarding">Account Setup</Link>
         </p>
         {target ? (
           <p>

@@ -5,7 +5,11 @@ export type SessionPayload = {
   provider: "google" | "twitch" | "x" | "youtube" | "phantom";
   providerId: string;
   name?: string;
+  displayName?: string;
   avatar?: string | null;
+  bio?: string;
+  timezone?: string;
+  onboardingComplete?: boolean;
   ownedName?: string | null;
   web3Domain?: string | null;
   emailIdentity?: string | null;

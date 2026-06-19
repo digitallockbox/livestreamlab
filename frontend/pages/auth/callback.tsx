@@ -28,11 +28,9 @@ export default function AuthCallbackPage() {
       const session = await res.json();
       saveSession({ ...session, token });
 
-      if (session.role === "admin") {
-        router.replace("/dashboard/home");
-      } else {
-        router.replace("/creator-dashboard");
-      }
+      const nextRoute = session.onboardingComplete ? (session.role === "admin" ? "/dashboard/home" : "/creator-dashboard") : "/account/onboarding";
+
+      router.replace(nextRoute);
     }
 
     if (router.isReady) {

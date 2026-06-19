@@ -27,8 +27,13 @@ async function upsertUser({ provider, providerId, name, avatar, role }) {
     provider,
     providerId,
     name: name || `${provider} user`,
+    displayName: name || `${provider} user`,
     avatar: avatar || null,
     role,
+    bio: "",
+    timezone: "UTC",
+    onboardingComplete: false,
+    setupCompletedAt: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -59,8 +64,36 @@ async function bindNameToUser(userId, ownedName) {
   return updated;
 }
 
+async function updateProfile(userId, updates) {
+  const existing = usersById.get(String(userId));
+  if (!existing) return null;
+
+  const updated = {
+    ...existing,
+    displayName: updates.displayName ?? existing.displayName,
+    name: updates.displayName ?? existing.name,
+    avatar: updates.avatar ?? existing.avatar,
+    bio: updates.bio ?? existing.bio,
+    timezone: updates.timezone ?? existing.timezone,
+    onboardingComplete:
+      typeof updates.onboardingComplete === "boolean"
+        ? updates.onboardingComplete
+        : existing.onboardingComplete,
+    setupCompletedAt:
+      updates.onboardingComplete === true
+        ? new Date().toISOString()
+        : existing.setupCompletedAt,
+    updatedAt: new Date().toISOString(),
+  };
+
+  usersById.set(updated.id, updated);
+  users.set(key(updated.provider, updated.providerId), updated);
+  return updated;
+}
+
 module.exports = {
   upsertUser,
   getById,
   bindNameToUser,
+  updateProfile,
 };
