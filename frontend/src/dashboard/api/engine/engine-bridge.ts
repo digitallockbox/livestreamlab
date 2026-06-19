@@ -1,13 +1,7 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.livestreamlab.live";
-let runtimeJwt = "";
+const BASE_URL = "/api/dashboard";
 
-export function setDashboardApiToken(token) {
-  runtimeJwt = token || "";
-}
-
-function authHeaders() {
+function defaultHeaders() {
   return {
-    ...(runtimeJwt ? { Authorization: `Bearer ${runtimeJwt}` } : {}),
     "Content-Type": "application/json",
     Accept: "application/json",
   };
@@ -17,7 +11,7 @@ async function safeGet(path) {
   try {
     const res = await fetch(`${BASE_URL}${path}`, {
       method: "GET",
-      headers: authHeaders(),
+      headers: defaultHeaders(),
     });
     if (!res.ok) return null;
     return await res.json();
@@ -30,7 +24,7 @@ async function safePost(path, body = {}) {
   try {
     const res = await fetch(`${BASE_URL}${path}`, {
       method: "POST",
-      headers: authHeaders(),
+      headers: defaultHeaders(),
       body: JSON.stringify(body),
     });
     if (!res.ok) return null;
