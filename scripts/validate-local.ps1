@@ -170,12 +170,17 @@ Invoke-Step "Backend API smoke" {
 }
 
 Invoke-Step "Frontend proxied API smoke" {
-    Set-Location $backendPath
-    $backendProc = Start-Process node -PassThru -ArgumentList @("app.js")
-
     $frontendPort = Get-FrontendPort
+
+    Set-Location $backendPath
+    $backendProc = Start-Process node -PassThru -ArgumentList @("app.js") -Environment @{
+        FRONTEND_ORIGIN = "http://localhost:$frontendPort"
+    }
+
     Set-Location $frontendPath
-    $frontendProc = Start-Process npm -PassThru -ArgumentList @("run", "dev", "--", "-p", "$frontendPort")
+    $frontendProc = Start-Process npm -PassThru -ArgumentList @("run", "dev", "--", "-p", "$frontendPort") -Environment @{
+        NEXT_PUBLIC_BACKEND_ORIGIN = "http://localhost:4000"
+    }
 
     try {
         Wait-HttpReady -Url "http://localhost:4000/"
