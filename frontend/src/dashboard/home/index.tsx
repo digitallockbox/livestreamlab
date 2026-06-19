@@ -35,7 +35,10 @@ export default function Home() {
             <p>{nameSummary.identity}</p>
             <p>{nameSummary.domain}</p>
             <p>
-              Public profile: <Link href={nameSummary.profileUrl || "/creator/buy-name"}>{nameSummary.profileUrl || "/creator/buy-name"}</Link>
+              Public profile:{" "}
+              <Link href={nameSummary.profileUrl || "/creator/buy-name"}>
+                {nameSummary.profileUrl || "/creator/buy-name"}
+              </Link>
             </p>
           </>
         ) : (

@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { getSession, type SessionPayload } from "../utils/session";
+import DashboardTopBar from "./DashboardTopBar";
 
 type Props = {
   requiredRoles: Array<"admin" | "creator">;
@@ -40,5 +41,10 @@ export default function RoleGate({ requiredRoles, children }: Props) {
     return <main>Authorizing...</main>;
   }
 
-  return children;
+  return (
+    <div className="p-6">
+      <DashboardTopBar />
+      {children}
+    </div>
+  );
 }

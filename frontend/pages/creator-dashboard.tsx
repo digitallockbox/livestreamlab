@@ -38,7 +38,10 @@ export default function CreatorDashboardPage() {
               <p>Identity: {nameSummary.identity}</p>
               <p>Domain: {nameSummary.domain}</p>
               <p>
-                Profile: <Link href={nameSummary.profileUrl || "/creator/buy-name"}>{nameSummary.profileUrl || "/creator/buy-name"}</Link>
+                Profile:{" "}
+                <Link href={nameSummary.profileUrl || "/creator/buy-name"}>
+                  {nameSummary.profileUrl || "/creator/buy-name"}
+                </Link>
               </p>
               <p>STREAMING Balance: {nameSummary.balance}</p>
             </>
