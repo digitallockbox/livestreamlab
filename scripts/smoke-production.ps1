@@ -13,6 +13,16 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$failures = @()
+
+function Add-Failure {
+    param(
+        [string]$Message
+    )
+
+    $script:failures += $Message
+    Write-Host "FAIL $Message" -ForegroundColor Red
+}
 
 function Invoke-Step {
     param(
@@ -21,7 +31,12 @@ function Invoke-Step {
     )
 
     Write-Host "`n=== $Title ==="
-    & $Action
+    try {
+        & $Action
+    }
+    catch {
+        Add-Failure -Message ("[{0}] {1}" -f $Title, $_.Exception.Message)
+    }
 }
 
 function Assert-Status {
@@ -138,6 +153,14 @@ Invoke-Step "Session Login + Routing APIs" {
             Write-Host "PASS viewer profile route for purchased name"
         }
     }
+}
+
+if ($failures.Count -gt 0) {
+    Write-Host "`nProduction smoke found $($failures.Count) issue(s):" -ForegroundColor Red
+    foreach ($failure in $failures) {
+        Write-Host " - $failure" -ForegroundColor Red
+    }
+    throw "Production smoke failed"
 }
 
 Write-Host "`nProduction smoke completed successfully."

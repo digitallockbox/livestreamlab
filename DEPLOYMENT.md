@@ -60,3 +60,28 @@ Checks include:
 - auth login/session
 - web3 name check + name state
 - optional name purchase + viewer profile route
+
+## 5) Troubleshooting: Global 404 Failures
+
+If smoke returns 404 for frontend and backend origins, DNS or platform target mapping is usually incorrect.
+
+Validate quickly:
+
+```powershell
+Invoke-WebRequest https://livestreamlab.live/ -UseBasicParsing -MaximumRedirection 0
+Invoke-WebRequest https://api.livestreamlab.live/ -UseBasicParsing -MaximumRedirection 0
+```
+
+Expected behavior:
+
+- frontend origin should return app HTML for `/` and `/login`
+- backend origin should return backend JSON for `/`
+- backend origin should return `302` for `/dashboard/home` with `Accept: text/html`
+
+Fix checklist:
+
+- ensure `livestreamlab.live` and `www.livestreamlab.live` point to the correct Vercel project
+- ensure `api.livestreamlab.live` points to the correct Railway service
+- confirm Railway service has `FRONTEND_ORIGIN=https://livestreamlab.live`
+- confirm Vercel project has `NEXT_PUBLIC_BACKEND_ORIGIN=https://api.livestreamlab.live`
+- redeploy both services after env updates
