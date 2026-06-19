@@ -28,6 +28,11 @@ export default function RoleGate({ requiredRoles, children }: Props) {
       return;
     }
 
+    if (!current.onboardingComplete) {
+      router.replace("/account/onboarding");
+      return;
+    }
+
     setLoading(false);
   }, [allowedRoles, router]);
 

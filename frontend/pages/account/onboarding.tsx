@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { backendOrigin, clearSession, getSession, saveSession } from "../../src/dashboard/shared/utils/session";
+import {
+  backendOrigin,
+  clearSession,
+  getSession,
+  saveSession,
+} from "../../src/dashboard/shared/utils/session";
 
 export default function AccountOnboardingPage() {
   const router = useRouter();
@@ -16,6 +21,11 @@ export default function AccountOnboardingPage() {
   useEffect(() => {
     if (!session) {
       router.replace("/login");
+      return;
+    }
+
+    if (session.onboardingComplete) {
+      router.replace(session.role === "admin" ? "/dashboard/home" : "/creator-dashboard");
       return;
     }
 
@@ -81,22 +91,42 @@ export default function AccountOnboardingPage() {
         <p>
           <label htmlFor="displayName">Display Name</label>
           <br />
-          <input id="displayName" value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="Anthony" />
+          <input
+            id="displayName"
+            value={displayName}
+            onChange={(event) => setDisplayName(event.target.value)}
+            placeholder="Anthony"
+          />
         </p>
         <p>
           <label htmlFor="bio">Bio</label>
           <br />
-          <textarea id="bio" value={bio} onChange={(event) => setBio(event.target.value)} placeholder="Tell viewers who you are." />
+          <textarea
+            id="bio"
+            value={bio}
+            onChange={(event) => setBio(event.target.value)}
+            placeholder="Tell viewers who you are."
+          />
         </p>
         <p>
           <label htmlFor="timezone">Timezone</label>
           <br />
-          <input id="timezone" value={timezone} onChange={(event) => setTimezone(event.target.value)} placeholder="UTC" />
+          <input
+            id="timezone"
+            value={timezone}
+            onChange={(event) => setTimezone(event.target.value)}
+            placeholder="UTC"
+          />
         </p>
         <p>
           <label htmlFor="avatar">Avatar URL</label>
           <br />
-          <input id="avatar" value={avatar} onChange={(event) => setAvatar(event.target.value)} placeholder="https://..." />
+          <input
+            id="avatar"
+            value={avatar}
+            onChange={(event) => setAvatar(event.target.value)}
+            placeholder="https://..."
+          />
         </p>
         <p>{message}</p>
         <p>
