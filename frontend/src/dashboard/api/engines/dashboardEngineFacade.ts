@@ -7,10 +7,24 @@ const ALLOWED_ENDPOINTS = new Set([
     "tenant/creators",
     "system/engines/activate",
     "system/engines/bootLogs",
+    "creator/current/photos",
+    "creator/current/photos/upload",
+    "creator/current/nfts",
+    "creator/current/badges",
+    "creator/profile/media",
+    "nft/mint",
 ]);
 
 export function isAllowedDashboardEndpoint(routePath: string): boolean {
-    return ALLOWED_ENDPOINTS.has(routePath);
+    if (ALLOWED_ENDPOINTS.has(routePath)) {
+        return true;
+    }
+
+    return (
+        /^creator\/[^/]+\/photos(?:\/upload)?$/.test(routePath) ||
+        /^creator\/[^/]+\/nfts$/.test(routePath) ||
+        /^creator\/[^/]+\/badges$/.test(routePath)
+    );
 }
 
 export function buildDashboardTargetUrl(baseUrl: string, routePath: string, query: URLSearchParams): string {

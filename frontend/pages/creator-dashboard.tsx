@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import RoleGate from "../src/dashboard/shared/ui/RoleGate";
 import { getSession } from "../src/dashboard/shared/utils/session";
+import BadgeRow from "../src/components/BadgeRow";
+import CreatorNFTs from "../src/components/CreatorNFTs";
+import CreatorPhotos from "../src/components/CreatorPhotos";
+import ProfileMediaEditor from "../src/components/ProfileMediaEditor";
+import { useCreatorBadges } from "../src/hooks/useCreatorBadges";
 
 type NameSummary = {
   hasName?: boolean;
@@ -15,6 +20,8 @@ type NameSummary = {
 export default function CreatorDashboardPage() {
   const [nameSummary, setNameSummary] = useState<NameSummary | null>(null);
   const session = getSession();
+  const creatorId = session?.ownedName || session?.web3Domain || "current";
+  const { badges } = useCreatorBadges(creatorId);
 
   useEffect(() => {
     if (!session?.token) return;
@@ -29,9 +36,9 @@ export default function CreatorDashboardPage() {
 
   return (
     <RoleGate requiredRoles={["admin", "creator"]}>
-      <main>
-        <h1>Creator Dashboard</h1>
-        <div className="card">
+      <main className="space-y-6 text-white">
+        <section className="rounded border border-gray-700 bg-gray-900/60 p-4">
+          <h1 className="text-2xl font-bold">Creator Dashboard</h1>
           <p>You are logged in as creator.</p>
           {nameSummary?.hasName ? (
             <>
@@ -48,6 +55,7 @@ export default function CreatorDashboardPage() {
           ) : (
             <p>No .livestreamlab name yet. Mint one to get your public identity.</p>
           )}
+          <BadgeRow badges={badges} />
           <p>
             <Link href="/dashboard/go-live">Go Live</Link>
           </p>
@@ -57,7 +65,11 @@ export default function CreatorDashboardPage() {
           <p>
             <Link href="/creator/buy-name">Buy .livestreamlab Name</Link>
           </p>
-        </div>
+        </section>
+
+        <ProfileMediaEditor />
+        <CreatorPhotos creatorId={creatorId} />
+        <CreatorNFTs creatorId={creatorId} />
       </main>
     </RoleGate>
   );
