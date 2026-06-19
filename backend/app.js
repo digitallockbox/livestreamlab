@@ -11,6 +11,7 @@ const userRoutes = require("./routes/user");
 const web3Routes = require("./routes/web3");
 
 const PORT = Number(process.env.BACKEND_PORT || 4000);
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:3000";
 
 const routes = [
   {
@@ -117,6 +118,17 @@ const server = http.createServer(async (req, res) => {
   });
 
   if (!route) {
+    const acceptsHtml = String(req.headers.accept || "").includes("text/html");
+    const isGet = req.method === "GET";
+    const isApiLike = pathName.startsWith("/api/") || pathName.startsWith("/auth/") || pathName.startsWith("/web3/");
+
+    if (isGet && acceptsHtml && !isApiLike) {
+      const target = `${FRONTEND_ORIGIN.replace(/\/$/, "")}${requestUrl.pathname}${requestUrl.search}`;
+      res.writeHead(302, { Location: target });
+      res.end();
+      return;
+    }
+
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Route not found" }));
     return;
