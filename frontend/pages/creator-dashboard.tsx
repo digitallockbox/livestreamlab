@@ -14,6 +14,9 @@ export default function CreatorDashboardPage() {
           <p>
             <Link href="/dashboard/content">Content</Link>
           </p>
+          <p>
+            <Link href="/creator/buy-name">Buy .livestreamlab Name</Link>
+          </p>
         </div>
       </main>
     </RoleGate>

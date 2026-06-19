@@ -58,6 +58,7 @@ export default function LoginPage() {
     <main>
       <h1>Login</h1>
       <p>Only founder IDs get admin role. Everyone else becomes creator.</p>
+      <p>Supported platforms: Google, Twitch, X, YouTube, and Phantom.</p>
       <div className="card">
         <p>
           <label htmlFor="provider-id">Provider User ID</label>
@@ -66,7 +67,7 @@ export default function LoginPage() {
             id="provider-id"
             value={providerId}
             onChange={(event) => setProviderId(event.target.value)}
-            placeholder="Enter your Google/Twitch/X/YouTube user ID"
+            placeholder="Enter your Google/Twitch/X/YouTube/Phantom ID"
           />
         </p>
         <p>

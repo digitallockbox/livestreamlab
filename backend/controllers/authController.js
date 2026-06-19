@@ -111,13 +111,18 @@ async function session(req, res) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
+  const persisted = await userService.getById(req.user.userId);
+
   return res.json({
-    userId: req.user.userId,
-    role: req.user.role,
-    provider: req.user.provider,
-    providerId: req.user.providerId,
-    name: req.user.name,
-    avatar: req.user.avatar,
+    userId: persisted?.id || req.user.userId,
+    role: persisted?.role || req.user.role,
+    provider: persisted?.provider || req.user.provider,
+    providerId: persisted?.providerId || req.user.providerId,
+    name: persisted?.name || req.user.name,
+    avatar: persisted?.avatar || req.user.avatar,
+    ownedName: persisted?.ownedName || null,
+    web3Domain: persisted?.web3Domain || null,
+    emailIdentity: persisted?.emailIdentity || null,
   });
 }
 

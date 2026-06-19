@@ -6,6 +6,9 @@ export type SessionPayload = {
   providerId: string;
   name?: string;
   avatar?: string | null;
+  ownedName?: string | null;
+  web3Domain?: string | null;
+  emailIdentity?: string | null;
 };
 
 const SESSION_KEY = "livestreamlab.session";

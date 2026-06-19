@@ -8,6 +8,7 @@ const analyticsRoutes = require("./routes/analytics");
 const streamRoutes = require("./routes/stream");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
+const web3Routes = require("./routes/web3");
 
 const PORT = Number(process.env.BACKEND_PORT || 4000);
 
@@ -29,6 +30,7 @@ const routes = [
   ...streamRoutes,
   ...authRoutes,
   ...userRoutes,
+  ...web3Routes,
 ];
 
 function parseBody(rawBody) {
