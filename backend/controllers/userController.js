@@ -3,17 +3,22 @@ const userService = require("../services/userService");
 async function getProfile(req, res) {
   const { id } = req.params;
 
-  if (id === "me") {
-    if (!req.user) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
+  if (id === "me") {
     const current = await userService.getById(req.user.userId);
     if (!current) {
       return res.status(404).json({ error: "User not found" });
     }
 
     return res.json(current);
+  }
+
+  // Admin can read any profile, creators can only read their own profile.
+  if (req.user.role !== "admin" && req.user.userId !== id) {
+    return res.status(403).json({ error: "Forbidden" });
   }
 
   const profile = await userService.getById(id);
