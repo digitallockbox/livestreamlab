@@ -1,9 +1,13 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.livestreamlab.live";
-const JWT = process.env.NEXT_PUBLIC_API_JWT || "";
+let runtimeJwt = "";
+
+export function setDashboardApiToken(token) {
+  runtimeJwt = token || "";
+}
 
 function authHeaders() {
   return {
-    ...(JWT ? { Authorization: `Bearer ${JWT}` } : {}),
+    ...(runtimeJwt ? { Authorization: `Bearer ${runtimeJwt}` } : {}),
     "Content-Type": "application/json",
     Accept: "application/json",
   };
