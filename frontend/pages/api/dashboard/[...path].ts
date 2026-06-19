@@ -34,13 +34,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const { baseUrl, token } = getUpstreamConfig();
-    const targetUrl = `${baseUrl}/${routePath}`;
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(req.query)) {
+        if (key === "path") continue;
+        if (Array.isArray(value)) {
+            value.forEach((item) => query.append(key, item));
+        } else if (typeof value === "string") {
+            query.append(key, value);
+        }
+    }
+    const queryString = query.toString();
+    const targetUrl = `${baseUrl.replace(/\/$/, "")}/${routePath}${queryString ? `?${queryString}` : ""}`;
 
     try {
         const upstream = await fetch(targetUrl, {
             method: req.method,
             headers: {
-                "Content-Type": "application/json",
+                ...(req.method === "POST" ? { "Content-Type": "application/json" } : {}),
                 Accept: "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },

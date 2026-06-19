@@ -1,5 +1,12 @@
 const BASE_URL = "/api/dashboard";
 
+export type DashboardApiResult<T = unknown> = {
+  ok: boolean;
+  status: number;
+  data: T | null;
+  error: string | null;
+};
+
 function defaultHeaders() {
   return {
     "Content-Type": "application/json",
@@ -13,10 +20,28 @@ async function safeGet(path) {
       method: "GET",
       headers: defaultHeaders(),
     });
-    if (!res.ok) return null;
-    return await res.json();
+    const payload = await res.json().catch(() => null);
+    if (!res.ok) {
+      return {
+        ok: false,
+        status: res.status,
+        data: null,
+        error: payload?.error || `Request failed with status ${res.status}`,
+      };
+    }
+    return {
+      ok: true,
+      status: res.status,
+      data: payload,
+      error: null,
+    };
   } catch {
-    return null;
+    return {
+      ok: false,
+      status: 0,
+      data: null,
+      error: "Network error while contacting dashboard API",
+    };
   }
 }
 
@@ -27,10 +52,28 @@ async function safePost(path, body = {}) {
       headers: defaultHeaders(),
       body: JSON.stringify(body),
     });
-    if (!res.ok) return null;
-    return await res.json();
+    const payload = await res.json().catch(() => null);
+    if (!res.ok) {
+      return {
+        ok: false,
+        status: res.status,
+        data: null,
+        error: payload?.error || `Request failed with status ${res.status}`,
+      };
+    }
+    return {
+      ok: true,
+      status: res.status,
+      data: payload,
+      error: null,
+    };
   } catch {
-    return null;
+    return {
+      ok: false,
+      status: 0,
+      data: null,
+      error: "Network error while contacting dashboard API",
+    };
   }
 }
 
