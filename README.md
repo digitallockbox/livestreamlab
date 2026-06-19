@@ -41,3 +41,8 @@ Frontend routes:
 
 - Backend template: `backend/.env.example`
 - Frontend template: `frontend/.env.example`
+
+## Deployment
+
+- Deployment checklist: `DEPLOYMENT.md`
+- Production smoke script: `scripts/smoke-production.ps1`
