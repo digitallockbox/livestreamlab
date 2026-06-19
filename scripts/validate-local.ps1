@@ -3,6 +3,7 @@ $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $backendPath = Join-Path $root "backend"
 $frontendPath = Join-Path $root "frontend"
+$allProjectPaths = @($backendPath, $frontendPath)
 
 function Invoke-Step {
     param(
@@ -33,9 +34,69 @@ function Wait-HttpReady {
     throw "Service did not become ready: $Url"
 }
 
+function Test-PortAvailable {
+    param(
+        [int]$Port
+    )
+
+    try {
+        $null = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction Stop
+        return $false
+    }
+    catch {
+        return $true
+    }
+}
+
+function Get-FrontendPort {
+    $candidates = @(3000, 3001, 3100, 3200)
+    foreach ($candidate in $candidates) {
+        if (Test-PortAvailable -Port $candidate) {
+            return $candidate
+        }
+    }
+
+    throw "No available frontend port found in candidate list: $($candidates -join ', ')"
+}
+
+function Stop-ProcessTree {
+    param(
+        [System.Diagnostics.Process]$Proc
+    )
+
+    if (-not $Proc) {
+        return
+    }
+
+    if (-not $Proc.HasExited) {
+        taskkill /PID $Proc.Id /T /F | Out-Null
+    }
+}
+
 Invoke-Step "Frontend TypeScript + import integrity build" {
     Set-Location $frontendPath
     npm run build
+}
+
+Invoke-Step "Dependency correctness" {
+    Set-Location $frontendPath
+    npm install
+    npm ls --depth=0 | Out-Null
+
+    Set-Location $backendPath
+    if (Test-Path (Join-Path $backendPath "package.json")) {
+        npm ls --depth=0 | Out-Null
+    }
+}
+
+Invoke-Step "Frontend ESLint" {
+    Set-Location $frontendPath
+    npm run lint
+}
+
+Invoke-Step "Frontend Prettier check" {
+    Set-Location $frontendPath
+    npm run format:check
 }
 
 Invoke-Step "Backend JavaScript syntax" {
@@ -45,21 +106,34 @@ Invoke-Step "Backend JavaScript syntax" {
     }
 }
 
-Invoke-Step "Backend file integrity" {
-    $emptyFiles = Get-ChildItem -Path $backendPath -Recurse -File | Where-Object { $_.Length -eq 0 }
+Invoke-Step "Project file integrity" {
+    $files = foreach ($path in $allProjectPaths) {
+        Get-ChildItem -Path $path -Recurse -File |
+        Where-Object {
+            $_.FullName -notmatch "\\node_modules\\" -and
+            $_.FullName -notmatch "\\\.next\\" -and
+            $_.FullName -notmatch "\\\.git\\"
+        }
+    }
+
+    $emptyFiles = $files | Where-Object {
+        $_.Length -eq 0 -and
+        $_.Name -ne ".gitkeep"
+    }
     if ($emptyFiles) {
         throw "Empty files detected: $($emptyFiles.FullName -join ', ')"
     }
 
-    $duplicates = Get-ChildItem -Path $backendPath -Recurse -File |
-        Group-Object Name |
-        Where-Object { $_.Count -gt 1 }
+    $duplicates = $files |
+    Group-Object Name |
+    Where-Object { $_.Count -gt 1 }
 
     if ($duplicates) {
         $dupList = $duplicates | ForEach-Object { "$($_.Name) x$($_.Count)" }
         Write-Host "Duplicate filenames found across folders:"
         $dupList | ForEach-Object { Write-Host " - $_" }
-    } else {
+    }
+    else {
         Write-Host "No duplicate filenames detected."
     }
 }
@@ -85,27 +159,31 @@ Invoke-Step "Backend API smoke" {
             if ($res.StatusCode -ne 200) {
                 throw "Route failed: $route => $($res.StatusCode)"
             }
+            Write-Host "PASS $route"
         }
 
         Write-Host "Backend API smoke passed."
     }
     finally {
-        if ($backendProc -and -not $backendProc.HasExited) {
-            Stop-Process -Id $backendProc.Id -Force
-        }
+        Stop-ProcessTree -Proc $backendProc
     }
 }
 
 Invoke-Step "Frontend proxied API smoke" {
+    Set-Location $backendPath
+    $backendProc = Start-Process node -PassThru -ArgumentList @("app.js")
+
+    $frontendPort = Get-FrontendPort
     Set-Location $frontendPath
-    $frontendProc = Start-Process npm -PassThru -ArgumentList @("run", "dev", "--", "-p", "3000")
+    $frontendProc = Start-Process npm -PassThru -ArgumentList @("run", "dev", "--", "-p", "$frontendPort")
 
     try {
-        Wait-HttpReady -Url "http://localhost:3000/"
+        Wait-HttpReady -Url "http://localhost:4000/"
+        Wait-HttpReady -Url "http://localhost:$frontendPort/"
 
         $routes = @(
-            "http://localhost:3000/api/dashboard/analytics/overview",
-            "http://localhost:3000/api/dashboard/system/enginesHealth"
+            "http://localhost:$frontendPort/api/dashboard/analytics/overview",
+            "http://localhost:$frontendPort/api/dashboard/system/enginesHealth"
         )
 
         foreach ($route in $routes) {
@@ -113,14 +191,14 @@ Invoke-Step "Frontend proxied API smoke" {
             if ($res.StatusCode -ne 200) {
                 throw "Route failed: $route => $($res.StatusCode)"
             }
+            Write-Host "PASS $route"
         }
 
         Write-Host "Frontend proxy smoke passed."
     }
     finally {
-        if ($frontendProc -and -not $frontendProc.HasExited) {
-            Stop-Process -Id $frontendProc.Id -Force
-        }
+        Stop-ProcessTree -Proc $frontendProc
+        Stop-ProcessTree -Proc $backendProc
     }
 }
 

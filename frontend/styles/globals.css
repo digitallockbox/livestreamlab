@@ -14,12 +14,7 @@ body {
     Segoe UI,
     system-ui,
     sans-serif;
-  background: radial-gradient(
-    circle at top left,
-    #111827,
-    #0a0f1d 45%,
-    #05070f 100%
-  );
+  background: radial-gradient(circle at top left, #111827, #0a0f1d 45%, #05070f 100%);
   color: #f3f4f6;
   min-height: 100%;
 }
