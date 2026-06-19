@@ -1,9 +1,9 @@
-const BASE_URL = "https://api.livestreamlab.live";
-const JWT = "8jExKCc1Y4LEjVjBLRGZEeY7vWBVzr9iTPRKh8Jzmoon";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.livestreamlab.live";
+const JWT = process.env.NEXT_PUBLIC_API_JWT || "";
 
 function authHeaders() {
   return {
-    Authorization: `Bearer ${JWT}`,
+    ...(JWT ? { Authorization: `Bearer ${JWT}` } : {}),
     "Content-Type": "application/json",
     Accept: "application/json",
   };
