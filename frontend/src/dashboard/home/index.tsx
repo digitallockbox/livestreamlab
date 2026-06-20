@@ -50,6 +50,19 @@ export default function Home() {
           </>
         )}
       </div>
+
+      <div className="mt-6 grid gap-2 rounded border border-gray-700 bg-gray-900 p-4 text-sm">
+        <p className="font-semibold">Control Center</p>
+        <Link href="/dashboard/analytics-overview">Analytics Overview</Link>
+        <Link href="/dashboard/stream-health">Stream Health</Link>
+        <Link href="/dashboard/go-live">Go Live</Link>
+        <Link href="/dashboard/content">Content</Link>
+        <Link href="/dashboard/monetization">Monetization</Link>
+        <Link href="/dashboard/messages">Messages</Link>
+        <Link href="/dashboard/notifications">Notifications</Link>
+        <Link href="/dashboard/settings">Settings and Vault</Link>
+        <Link href="/dashboard/admin">Admin Panel</Link>
+      </div>
     </div>
   );
 }

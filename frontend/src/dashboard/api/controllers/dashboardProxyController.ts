@@ -21,12 +21,12 @@ function extractQueryWithoutPath(req: NextApiRequest): URLSearchParams {
 }
 
 export async function dashboardProxyController(req: NextApiRequest, res: NextApiResponse, routePath: string) {
-    if (req.method !== "GET" && req.method !== "POST") {
-        res.setHeader("Allow", "GET, POST");
+    if (req.method !== "GET" && req.method !== "POST" && req.method !== "PATCH" && req.method !== "DELETE") {
+        res.setHeader("Allow", "GET, POST, PATCH, DELETE");
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const method = req.method as "GET" | "POST";
+    const method = req.method as "GET" | "POST" | "PATCH" | "DELETE";
 
     try {
         const result = await proxyDashboardRequest({

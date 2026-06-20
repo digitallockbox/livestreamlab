@@ -63,6 +63,23 @@ export default function CreatorDashboardPage() {
             <Link href="/dashboard/content">Content</Link>
           </p>
           <p>
+            <Link href="/dashboard/monetization">Monetization</Link>
+          </p>
+          <p>
+            <Link href="/dashboard/messages">Messages</Link>
+          </p>
+          <p>
+            <Link href="/dashboard/notifications">Notifications</Link>
+          </p>
+          <p>
+            <Link href="/dashboard/settings">Settings and Vault</Link>
+          </p>
+          {session?.role === "admin" ? (
+            <p>
+              <Link href="/dashboard/admin">Admin Panel</Link>
+            </p>
+          ) : null}
+          <p>
             <Link href="/creator/buy-name">Buy .livestreamlab Name</Link>
           </p>
         </section>

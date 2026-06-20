@@ -5,6 +5,9 @@ const ALLOWED_ENDPOINTS = new Set([
     "analytics/streamAnalytics",
     "analytics/contentAnalytics",
     "tenant/creators",
+    "creator/stats",
+    "creator/earnings",
+    "creator/streams",
     "system/engines/activate",
     "system/engines/bootLogs",
     "creator/current/photos",
@@ -12,6 +15,26 @@ const ALLOWED_ENDPOINTS = new Set([
     "creator/current/nfts",
     "creator/current/badges",
     "creator/profile/media",
+    "creator/vault",
+    "creator/vault/upload",
+    "creator/vault/delete",
+    "store/products",
+    "store/create",
+    "store/update",
+    "store/delete",
+    "store/upload-image",
+    "stream/start",
+    "stream/status",
+    "stream/end",
+    "messages/thread",
+    "messages/send",
+    "messages/read",
+    "notifications",
+    "admin/users",
+    "admin/streams",
+    "admin/products",
+    "admin/users/ban",
+    "admin/content/remove",
     "nft/mint",
 ]);
 
@@ -34,17 +57,18 @@ export function buildDashboardTargetUrl(baseUrl: string, routePath: string, quer
 
 export async function forwardDashboardRequest(params: {
     targetUrl: string;
-    method: "GET" | "POST";
+    method: "GET" | "POST" | "PATCH" | "DELETE";
     incomingAuth?: string;
     fallbackToken?: string;
     body?: unknown;
 }): Promise<{ status: number; payload: unknown }> {
     const { targetUrl, method, incomingAuth, fallbackToken, body } = params;
+    const hasJsonBody = method !== "GET" && method !== "DELETE";
 
     const upstream = await fetch(targetUrl, {
         method,
         headers: {
-            ...(method === "POST" ? { "Content-Type": "application/json" } : {}),
+            ...(hasJsonBody ? { "Content-Type": "application/json" } : {}),
             Accept: "application/json",
             ...(incomingAuth
                 ? { Authorization: incomingAuth }
@@ -52,7 +76,7 @@ export async function forwardDashboardRequest(params: {
                     ? { Authorization: `Bearer ${fallbackToken}` }
                     : {}),
         },
-        body: method === "POST" ? JSON.stringify(body || {}) : undefined,
+        body: hasJsonBody ? JSON.stringify(body || {}) : undefined,
     });
 
     const contentType = upstream.headers.get("content-type") || "";

@@ -9,7 +9,7 @@ const LOCAL_UPSTREAM_BASE = "http://localhost:4000";
 
 export type DashboardProxyInput = {
     routePath: string;
-    method: "GET" | "POST";
+    method: "GET" | "POST" | "PATCH" | "DELETE";
     query: URLSearchParams;
     incomingAuth?: string;
     body?: unknown;
